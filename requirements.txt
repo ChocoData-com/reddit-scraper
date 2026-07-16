@@ -1,0 +1,6 @@
+requests>=2.31.0
+
+# Only needed to regenerate the graphics in assets/ (see assets/_src/).
+# Not required to run anything in reddit_scraper_api_codes/ or free_scraper/.
+#   pillow>=10.0.0
+#   numpy>=1.24.0

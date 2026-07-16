@@ -1,0 +1,213 @@
+{
+  "post": {
+    "id": "t3_1uuuf9c",
+    "title": "Will PEP 505 ever be accepted?",
+    "author": {
+      "username": "philtrondaboss",
+      "id": "t2_8k02pahq"
+    },
+    "score": 11,
+    "upvote_ratio": 0.535483870967742,
+    "num_comments": 190,
+    "created": "2026-07-12T23:04:35.157000+0000",
+    "body": "https://peps.python.org/pep-0505/ I don't understand how null safe operators are less like plain English than other implemented features like the walrus operator. In my opinion, the member access operator would make python significantly easier to read and understand. Here's an example: f = foo() if f is None: baz = \"\" else: baz = f.bar() baz = foo()?.bar() ?: \"\" EDIT: I forgot that \"and\" and \"or\" can be sometimes used in place of \"?.\" and \"?:\" if the left value is not False, '', 0, [], or {}. It's a very implicit null check and has a lot of unexpected behavior.",
+    "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/will_pep_505_ever_be_accepted/",
+    "external_url": null,
+    "domain": "self.Python",
+    "is_locked": null,
+    "is_removed": null
+  },
+  "comments": [
+    {
+      "id": "t1_ox6854j",
+      "parent_id": null,
+      "depth": 0,
+      "score": 256,
+      "author": {
+        "username": "disposepriority",
+        "id": null
+      },
+      "body": "Just my two cents, I enjoy my occasional python though it's not my primary language and that looks very unpythonic in my eyes. Most certainly not easier to read in any way, though I am a verbose/explicit code preference kinda guy.",
+      "created": "2026-07-12T23:10:38.774000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox6854j/",
+      "replies": [
+        {
+          "id": "t1_ox693jc",
+          "parent_id": "t1_ox6854j",
+          "depth": 1,
+          "score": 58,
+          "author": {
+            "username": "Vietname",
+            "id": null
+          },
+          "body": "I'm mainly a python dev but my main secondary language is JS, and im just fine keeping this out of python. It's useful when im writing JS, but its hard to parse when im reading someone else's code compared to the more verbose python equivalent.",
+          "created": "2026-07-12T23:16:01.012000+0000",
+          "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox693jc/",
+          "replies": []
+        },
+        {
+          "id": "t1_ox6eipg",
+          "parent_id": "t1_ox6854j",
+          "depth": 1,
+          "score": 35,
+          "author": {
+            "username": "Smallpaul",
+            "id": null
+          },
+          "body": "Any new syntax looks non-Pythonic until it’s been in Python for 5 years.",
+          "created": "2026-07-12T23:46:46.239000+0000",
+          "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox6eipg/",
+          "replies": []
+        }
+      ]
+    },
+    {
+      "id": "t1_ox8iug8",
+      "parent_id": null,
+      "depth": 0,
+      "score": 99,
+      "author": {
+        "username": "runawayasfastasucan",
+        "id": null
+      },
+      "body": "baz = foo()?.bar() ?: \" This monstrosity is not why I code python.",
+      "created": "2026-07-13T08:33:30.709000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox8iug8/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox6f0xr",
+      "parent_id": null,
+      "depth": 0,
+      "score": 60,
+      "author": {
+        "username": "BeamMeUpBiscotti",
+        "id": null
+      },
+      "body": "The walrus operator was really controversial, the creator of Python pushed it through but afterwards stepped down and handed control of the language over to a steering council. So that is to say, the walrus operator was a one-time thing and it's not possible for null-safe operators to follow the same path to get into the language. At this point, after 10 years of bikeshedding and arguing in circles, I don't think anyone has the desire/political capital to get it over the finish line.",
+      "created": "2026-07-12T23:49:38.514000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox6f0xr/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox69282",
+      "parent_id": null,
+      "depth": 0,
+      "score": 59,
+      "author": {
+        "username": "sausix",
+        "id": null
+      },
+      "body": "We have that functionality basically. It's a bit off standard and you have to be aware about the object's reported bool state. baz = f and f.bar() or \"\" Of course it's not beginner friendly but once you know about the magic behind and and or then you love it.",
+      "created": "2026-07-12T23:15:48.376000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox69282/",
+      "replies": [
+        {
+          "id": "t1_ox69s39",
+          "parent_id": "t1_ox69282",
+          "depth": 1,
+          "score": 68,
+          "author": {
+            "username": "Designer-Ad-2136",
+            "id": null
+          },
+          "body": "Or i'd do: baz = \"\" if f is None else f.bar()",
+          "created": "2026-07-12T23:19:53.618000+0000",
+          "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox69s39/",
+          "replies": []
+        },
+        {
+          "id": "t1_ox69v9u",
+          "parent_id": "t1_ox69282",
+          "depth": 1,
+          "score": 27,
+          "author": {
+            "username": "Due_Campaign_9765",
+            "id": null
+          },
+          "body": "Now chain 5 of them.",
+          "created": "2026-07-12T23:20:22.679000+0000",
+          "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox69v9u/",
+          "replies": []
+        }
+      ]
+    },
+    {
+      "id": "t1_oxcjb8d",
+      "parent_id": null,
+      "depth": 0,
+      "score": 21,
+      "author": {
+        "username": "Koen1999",
+        "id": null
+      },
+      "body": "Less lines of code does not necessarily mean it's easier to read.",
+      "created": "2026-07-13T20:45:38.036000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/oxcjb8d/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox6bb2p",
+      "parent_id": null,
+      "depth": 0,
+      "score": 20,
+      "author": {
+        "username": "shadowdance55",
+        "id": null
+      },
+      "body": "Explicit is better than implicit. And in the wold where there is less and less code written by hand, terse and potentially non-obvious syntax it's becoming a liability rather than asset.",
+      "created": "2026-07-12T23:28:29.847000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox6bb2p/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox8lq3p",
+      "parent_id": null,
+      "depth": 0,
+      "score": 8,
+      "author": {
+        "username": "cottonycloud",
+        "id": null
+      },
+      "body": "It should actually be baz = foo()?.bar() ?? '' ?: is the ternary operator while ?? is the null-coalescing operator.",
+      "created": "2026-07-13T08:58:07.126000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox8lq3p/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox67qs3",
+      "parent_id": null,
+      "depth": 0,
+      "score": 16,
+      "author": {
+        "username": "IlliterateDumbNerd",
+        "id": null
+      },
+      "body": "In my opinion, I hope not, though I can see why you would think that this would be a good idea",
+      "created": "2026-07-12T23:08:25.160000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox67qs3/",
+      "replies": []
+    },
+    {
+      "id": "t1_ox6mjjf",
+      "parent_id": null,
+      "depth": 0,
+      "score": 5,
+      "author": {
+        "username": "FrickinLazerBeams",
+        "id": null
+      },
+      "body": "God I wish they'd stop changing python.",
+      "created": "2026-07-13T00:33:17.440000+0000",
+      "permalink": "https://www.reddit.com/r/Python/comments/1uuuf9c/comment/ox6mjjf/",
+      "replies": []
+    }
+  ],
+  "comments_returned": 13,
+  "_meta": {
+    "source": "svc-comments+post-page",
+    "sort": "top",
+    "pages_fetched": 2,
+    "truncated": true
+  }
+}
