@@ -4,7 +4,7 @@
 
 **Reddit Scraper for extracting posts, scores, comments, upvote ratios, subreddit listings and search results from Reddit.com.** This repo has a free Reddit web scraping script you can run right now, and a Reddit data API with 4 endpoints returning real structured JSON.
 
-**Last updated: 2026-07-16.** Working against Reddit.com as of July 2026, and re-verified whenever Reddit changes their markup.
+**Last updated: 2026-07-17.** Working against Reddit.com as of July 2026, and re-verified whenever Reddit changes their markup.
 
 Every JSON block on this page was captured from the live API on 2026-07-16. Long arrays are trimmed to the first item or two and each block says exactly what was cut; the fields shown are verbatim. Full uncut samples are committed in [`reddit_scraper_api_data/`](reddit_scraper_api_data). Every code example calls the actual API and is runnable from [`reddit_scraper_api_codes/`](reddit_scraper_api_codes).
 
@@ -52,7 +52,7 @@ That is the whole point of this repo. Everything below is the reference: the fre
 - [Reddit Scraper API reference](#reddit-scraper-api-reference)
   - [Quickstart](#quickstart) · [Authentication](#authentication) · [Global parameters](#global-parameters) · [Errors](#errors) · [Rate limits and concurrency](#rate-limits-and-concurrency)
   - [1. Subreddit](#1-subreddit-post-listings-scores-and-upvote-ratios) · [2. Post](#2-post-full-post-data-and-the-nested-comment-tree) · [3. Search](#3-search-reddit-search-results-by-keyword) · [4. User](#4-user-public-submissions-and-comments)
-- [Social listening: a real use case](#social-listening-a-real-use-case)
+- [Track brand mentions across subreddits](#track-brand-mentions-across-subreddits)
 - [Measured latency](#measured-latency)
 
 ---
@@ -110,7 +110,7 @@ The scrapers that do what the script above does, with no key, are the ones that 
 
 ### Using the Chocodata Reddit Scraper API
 
-The managed option, and the one this repo is built around. Four endpoints for Reddit data extraction at scale (subreddit listings with real vote data, posts with their nested comment threads, search, and public user feeds), a ~99% success rate against the bot check, and no OAuth app to register. Free for the first 1,000 requests.
+The managed option, and the one this repo is built around: the [Chocodata Reddit Scraper API](https://chocodata.com/scraper-api/reddit?utm_source=github&utm_medium=repo&utm_campaign=reddit-scraper). Four endpoints for Reddit data extraction at scale (subreddit listings with real vote data, posts with their nested comment threads, search, and public user feeds), a ~99% success rate against the bot check, and no OAuth app to register. Free for the first 1,000 requests.
 
 ---
 
@@ -141,7 +141,7 @@ After running the command, your terminal should look something like this:
 
 ![Running the Reddit Scraper API subreddit endpoint](assets/run-subreddit.png)
 
-Get a key at [chocodata.com](https://chocodata.com) (1,000 requests, one-time, no card).
+Get a key at chocodata.com (1,000 requests, one-time, no card).
 
 ### Authentication
 
@@ -164,7 +164,7 @@ Nothing below is billed: **you are only charged on a 2xx**.
 | Status | `error` code | Meaning | Billed | What to do |
 |---|---|---|---|---|
 | `400` | `invalid_params` | A required param is missing or the wrong type. Body lists the exact issue and `path`. | no | Fix the query string. |
-| `401` | `INVALID_API_KEY` | Key missing, unrecognised, or revoked. | no | Check `api_key`. Get one at [chocodata.com](https://chocodata.com). |
+| `401` | `INVALID_API_KEY` | Key missing, unrecognised, or revoked. | no | Check `api_key`. Get one at chocodata.com. |
 | `402` | `INSUFFICIENT_CREDITS` | Balance exhausted. | no | Top up ($0.90 / 1,000 requests, never expires) or upgrade. |
 | `404` | `item_not_found` | The post/user does not exist, was removed, or the input could not be resolved. `retryable: false`. | no | Fix the id. Retrying will not help. |
 | `429` | `RATE_LIMITED` | Over your plan's concurrency. | no | Back off and retry; see [Rate limits](#rate-limits-and-concurrency). |
@@ -476,7 +476,7 @@ curl "https://api.chocodata.com/api/v1/reddit/search?api_key=YOUR_KEY&q=web%20sc
 }
 ```
 
-`score` and `num_comments` are `null` on **every search result**, always, not just this one. `_source: "rss"` says why, and `_rss_limitations` lists the ten fields that surface cannot carry. Search tells you **what and where**, not **how big**: if you need the score, take the `id` and `subreddit` from the result and spend one `/reddit/post` call on it. That is exactly what [`mention_monitor.py`](reddit_scraper_api_codes/mention_monitor.py) does, and the [use case below](#social-listening-a-real-use-case) shows it working.
+`score` and `num_comments` are `null` on **every search result**, always, not just this one. `_source: "rss"` says why, and `_rss_limitations` lists the ten fields that surface cannot carry. Search tells you **what and where**, not **how big**: if you need the score, take the `id` and `subreddit` from the result and spend one `/reddit/post` call on it. That is exactly what [`mention_monitor.py`](reddit_scraper_api_codes/mention_monitor.py) does, and [tracking brand mentions](#track-brand-mentions-across-subreddits) below shows it working.
 
 Also note `result_type`: 3 of these 25 results are `subreddit` rows (communities matching the query), not posts. Filter on `result_type == "post"` before you count anything, or your "22 mentions" becomes 25.
 
@@ -538,7 +538,7 @@ Runnable: [`reddit_scraper_api_codes/user.py`](reddit_scraper_api_codes/user.py)
 
 ---
 
-## Social listening: a real use case
+## Track brand mentions across subreddits
 
 Knowing when somebody mentions your product, while the thread is still live enough to reply to, is the main commercial reason to scrape Reddit. So that use case is in the repo end to end rather than as a snippet. [`mention_monitor.py`](reddit_scraper_api_codes/mention_monitor.py) searches for a keyword, stores every observation as a local dataset in SQLite (export it to CSV with one `sqlite3` command), enriches the newest hits with a real score via `/reddit/post`, and prints only what is new since the last run:
 
