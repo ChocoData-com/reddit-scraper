@@ -6,7 +6,7 @@
 
 **Last updated: 2026-07-16.** Working against Reddit.com as of July 2026, and re-verified whenever Reddit changes their markup.
 
-Every JSON block on this page was captured from the live API on 2026-07-16. Long arrays are trimmed to the first item or two (each block says exactly what was cut); **every field shown is verbatim**, nothing is rewritten, padded, or invented. Full uncut samples are committed in [`reddit_scraper_api_data/`](reddit_scraper_api_data), so you can diff this page against them. Every code example calls the actual API and is runnable from [`reddit_scraper_api_codes/`](reddit_scraper_api_codes).
+Every JSON block on this page was captured from the live API on 2026-07-16. Long arrays are trimmed to the first item or two and each block says exactly what was cut; the fields shown are verbatim. Full uncut samples are committed in [`reddit_scraper_api_data/`](reddit_scraper_api_data). Every code example calls the actual API and is runnable from [`reddit_scraper_api_codes/`](reddit_scraper_api_codes).
 
 ```bash
 pip install requests
@@ -40,7 +40,7 @@ That is one post object, complete, all 13 fields, nothing cut. A score of 11 wit
 
 ![Retrieved Reddit post data](assets/retrieved-data.png)
 
-That is the whole point of this repo. The rest of this page is how it works, what it costs, and where it stops.
+That is the whole point of this repo. Everything below is the reference: the free script, what Reddit does to it, and then each endpoint with its parameters and a real response.
 
 ---
 
@@ -53,7 +53,6 @@ That is the whole point of this repo. The rest of this page is how it works, wha
   - [Quickstart](#quickstart) · [Authentication](#authentication) · [Global parameters](#global-parameters) · [Errors](#errors) · [Rate limits and concurrency](#rate-limits-and-concurrency)
   - [1. Subreddit](#1-subreddit-post-listings-scores-and-upvote-ratios) · [2. Post](#2-post-full-post-data-and-the-nested-comment-tree) · [3. Search](#3-search-reddit-search-results-by-keyword) · [4. User](#4-user-public-submissions-and-comments)
 - [Social listening: a real use case](#social-listening-a-real-use-case)
-- [Build vs buy: what this actually costs](#build-vs-buy-what-this-actually-costs)
 - [Measured latency](#measured-latency)
 
 ---
@@ -74,11 +73,11 @@ After running the command, your terminal should look something like this:
 
 ![Free Reddit scraper refused with HTTP 403](assets/run-blocked.png)
 
-That is the honest outcome, and the next section is about why.
+No posts come back. The next section is why.
 
 ## Avoid getting blocked when scraping Reddit
 
-We ran exactly that script from a residential connection while writing this README, 4 times. All 4 returned the same thing. Here is the raw evidence, so you do not have to take our word for it:
+We ran exactly that script from a residential connection while writing this README, 4 times. All 4 returned the same thing:
 
 | What we measured | Value |
 |---|---|
@@ -103,7 +102,7 @@ Note what is **not** happening here, because it is the opposite of most scraping
 | **The open surfaces have no vote data** | Reddit's `.rss` feeds stay reachable without a key, which looks like a win until you notice they carry no `score`, no `upvote_ratio` and no `num_comments`. | You ship a "working" scraper that silently cannot answer the only question you had: is this post big or not? |
 | **Limits are Reddit's call, not a published constant** | "Reddit may set and enforce limits on your use of the Data APIs ... in our sole discretion" ([Data API Terms](https://redditinc.com/policies/data-api-terms) 2.9). | Capacity you cannot plan against, and terms that can move under you. |
 
-Worth knowing before you go shopping, because Reddit is genuinely different from most scraping targets here: **the popular free Reddit scrapers on GitHub are mostly not scrapers at all.** [URS](https://github.com/JosephLai241/URS) (1,008 stars, last pushed 2026-07-11, actively maintained) is built on PRAW and talks to Reddit's **official API** using an OAuth app you register yourself. It does not hit the wall above because it is not going through the front door at all. If that path fits your use case, it is a better answer than this repo, and the [Build vs buy](#build-vs-buy-what-this-actually-costs) section below argues for it rather than against it.
+Reddit is genuinely different from most scraping targets here: **the popular free Reddit scrapers on GitHub are mostly not scrapers at all.** [URS](https://github.com/JosephLai241/URS) (1,008 stars, last pushed 2026-07-11, actively maintained) is built on PRAW and talks to Reddit's **official API** using an OAuth app you register yourself. It does not hit the wall above because it is not going through the front door at all.
 
 The scrapers that do what the script above does, with no key, are the ones that meet the 403: [yars](https://github.com/datavorous/yars) advertises "without API keys" and was last pushed 2025-07-07. We measured the no-key route, not that specific repo, so take that as context rather than a verdict on it.
 
@@ -117,7 +116,7 @@ The managed option, and the one this repo is built around. Four endpoints for Re
 
 ## Reddit Scraper API reference
 
-Every response below is real. No login, no browser, no OAuth app.
+The Reddit Scraper API reference starts here: authentication, the global parameter, the error bodies, then one section per endpoint. No login and no OAuth app.
 
 ### Quickstart
 
@@ -160,7 +159,7 @@ Each request costs **5 credits (= 1 request)**. Responses are billed only on suc
 
 ### Errors
 
-Real captured error bodies, not paraphrases. Nothing below is billed: **you are only charged on a 2xx**.
+Nothing below is billed: **you are only charged on a 2xx**.
 
 | Status | `error` code | Meaning | Billed | What to do |
 |---|---|---|---|---|
@@ -254,8 +253,8 @@ A subreddit's post listing with real vote data: score, comment count, upvote rat
 | `subreddit` | string | **yes** | - | Subreddit name, with or without a leading `r/`. |
 | `sort` | `hot` \| `new` \| `top` \| `rising` \| `controversial` | no | `hot` | Listing sort. |
 | `t` | `hour` \| `day` \| `week` \| `month` \| `year` \| `all` | no | - | Time window. Only meaningful for `top` and `controversial`. |
-| `after` | string | no | - | Pagination cursor from a previous response. See the ceiling note below. |
-| `limit` | int (1-75) | no | `25` | Max posts to return. |
+| `after` | string | no | - | Pagination cursor from a previous response. See the note below. |
+| `limit` | int (1-75) | no | `25` | Max posts to return, though the upstream page holds ~24. See the note below. |
 
 ```bash
 curl "https://api.chocodata.com/api/v1/reddit/subreddit?api_key=YOUR_KEY&subreddit=Python"
@@ -293,9 +292,9 @@ curl "https://api.chocodata.com/api/v1/reddit/subreddit?api_key=YOUR_KEY&subredd
 
 `upvote_ratio` is the field most people come for and the one the free surfaces cannot give you: `score` alone cannot distinguish a quiet consensus from a brawl. `external_url` is `null` on all 24 posts in this sample because r/Python is a self-post subreddit, and `domain` reads `self.Python` accordingly: on a link subreddit those two carry the outbound URL and its host. `_source: "shreddit"` tells you the response came off the surface that carries vote data (see the search endpoint for what it looks like when that is not true).
 
-**Ceilings, read these before you buy:**
+Five behaviours to code against:
 
-- **Do not build pagination on this.** `after_cursor` came back `null` on **22 of 23** listings we captured, across r/Python, r/programming, r/webscraping and r/news on `hot`, `new` and `top`. The `after` param is accepted, but on the surface that normally answers there is no cursor coming back to feed it. Treat it as a single-page endpoint: ~24 to 25 posts per call.
+- **Treat this as a single-page endpoint: ~24 to 25 posts per call.** `after_cursor` came back `null` on **22 of 23** listings we captured, across r/Python, r/programming, r/webscraping and r/news on `hot`, `new` and `top`. The `after` param is accepted, but on the surface that normally answers there is no cursor coming back to feed it.
 - **`_source` is worth reading, and `total_results` is not always ~24.** The 23rd call above is the interesting one: it fell back to a secondary surface (`_source: "shreddit-ireddit"`), and that response *did* carry an `after_cursor`, but it returned **3 posts instead of 24**. So a thin result is a real outcome, not a quiet subreddit. Check `total_results` and `_source` rather than assuming a full page, and re-request if you got the short one.
 - **`limit` above ~24 does nothing.** The upstream page holds about 24 posts. We asked for 50 and 75 and got 24 both times.
 - **`rising` is not a distinct ranking.** On r/news, r/AskReddit and r/programming it returned the **identical 24-post set** as `hot` (24/24 overlap on all three). Treat it as an alias of `hot` rather than a rising feed. `new` is genuinely different (0/24 overlap with `hot` on r/AskReddit).
@@ -383,16 +382,16 @@ curl "https://api.chocodata.com/api/v1/reddit/post?api_key=YOUR_KEY&post_id=1uuu
 }
 ```
 
-The tree is genuinely nested rather than flattened: `parent_id` and `depth` are real, and `replies` recurses, so a 256-score top comment and the 58-score reply arguing with it stay attached to each other. `author.id` is `null` on comments (the comment surface does not carry the author's `t2_` id) while the post's `author.id` is populated, and `is_locked`/`is_removed` are `null` rather than `false`: we do not report a value the surface did not give us.
+The tree is genuinely nested rather than flattened: `parent_id` and `depth` are real, and `replies` recurses, so a 256-score top comment and the 58-score reply arguing with it stay attached to each other. `author.id` is `null` on comments (the comment surface does not carry the author's `t2_` id) while the post's `author.id` is populated, and `is_locked`/`is_removed` are `null` rather than `false`, meaning unknown: the surface did not carry a value either way.
 
 Running it:
 
 ![Reddit post endpoint output showing the nested comment tree](assets/run-post.png)
 
-**Ceilings, read these before you buy:**
+Four behaviours to code against:
 
-- **You get the top of the thread, not the thread.** `comments_returned` was **13 of 190** here, and `_meta.truncated` was `true` on **every single call we made**, across 6 posts with 29 to 246 comments each (we saw 11 to 15 comments returned). If your use case is "read the top of the discussion", this is right. If your use case is "export every comment in a thread", **this endpoint will not do it and you should not buy for that**.
-- **`subreddit` is case-sensitive, and getting it wrong fails quietly.** `subreddit=python` returns **HTTP 200 with `title`, `score`, `author` and `body` all `null`** while the comment tree arrives normally. `subreddit=Python` returns the full post. We reproduced this 4 out of 4 times in each direction, and the same applies in reverse (`Programming` fails where `programming` works). Pass the subreddit exactly as Reddit spells it, or pass the full post `url` and let it sort itself out. This is the sharpest edge in this repo and we would rather you hear it from us than find it in production.
+- **You get the top of the thread.** `comments_returned` was **13 of 190** here, and `_meta.truncated` was `true` on **every single call we made**, across 6 posts with 29 to 246 comments each (we saw 11 to 15 comments returned). Read `_meta.truncated` and `num_comments` to know where you stand.
+- **`subreddit` is case-sensitive, and getting it wrong fails quietly.** `subreddit=python` returns **HTTP 200 with `title`, `score`, `author` and `body` all `null`** while the comment tree arrives normally. `subreddit=Python` returns the full post. We reproduced this 4 out of 4 times in each direction, and the same applies in reverse (`Programming` fails where `programming` works). Pass the subreddit exactly as Reddit spells it, or pass the full post `url` and let it sort itself out.
 - **The post object is best-effort.** Even with the right casing it comes from a second fetch that can miss: we saw it return `null` once in roughly two dozen calls. The comment tree and `num_comments` always arrived. If `post.title is None`, retry.
 - **A dead post id returns 200, not 404.** `post_id=zzzzzzz` gives an all-null post stub with `num_comments: 0`. Check `post.title is None` rather than trusting the status code.
 
@@ -477,7 +476,7 @@ curl "https://api.chocodata.com/api/v1/reddit/search?api_key=YOUR_KEY&q=web%20sc
 }
 ```
 
-**Ceiling, read this before you buy:** `score` and `num_comments` are `null` on **every search result**, always, not just this one. `_source: "rss"` says why, and `_rss_limitations` lists the ten fields that surface cannot carry. We return `null` rather than invent a number. Search tells you **what and where**, not **how big**: if you need the score, take the `id` and `subreddit` from the result and spend one `/reddit/post` call on it. That is exactly what [`mention_monitor.py`](reddit_scraper_api_codes/mention_monitor.py) does, and the [use case below](#social-listening-a-real-use-case) shows it working.
+`score` and `num_comments` are `null` on **every search result**, always, not just this one. `_source: "rss"` says why, and `_rss_limitations` lists the ten fields that surface cannot carry. Search tells you **what and where**, not **how big**: if you need the score, take the `id` and `subreddit` from the result and spend one `/reddit/post` call on it. That is exactly what [`mention_monitor.py`](reddit_scraper_api_codes/mention_monitor.py) does, and the [use case below](#social-listening-a-real-use-case) shows it working.
 
 Also note `result_type`: 3 of these 25 results are `subreddit` rows (communities matching the query), not posts. Filter on `result_type == "post"` before you count anything, or your "22 mentions" becomes 25.
 
@@ -499,7 +498,7 @@ A public user's recent submissions and comments. This example uses u/spez, Reddi
 curl "https://api.chocodata.com/api/v1/reddit/user?api_key=YOUR_KEY&username=spez"
 ```
 
-**Real response.** `items` is cut to 1 of 25, and `_rss_limitations` is omitted here because it repeats the search block above (same three keys, same ten `unavailable_fields`; its `note` adds two sentences about karma and cake-day, quoted under the ceiling below). The profile and item objects are complete and verbatim ([full sample](reddit_scraper_api_data/user.json)):
+**Real response.** `items` is cut to 1 of 25, and `_rss_limitations` is omitted here because it repeats the search block above (same three keys, same ten `unavailable_fields`; its `note` adds two sentences about karma and cake-day, quoted in the note below). The profile and item objects are complete and verbatim ([full sample](reddit_scraper_api_data/user.json)):
 
 ```json
 {
@@ -533,7 +532,7 @@ curl "https://api.chocodata.com/api/v1/reddit/user?api_key=YOUR_KEY&username=spe
 
 `kind` does what it says: `overview` returned 21 comments plus 4 submissions, `submitted` returned 22 submissions, `comments` returned 25 comments.
 
-**Ceiling, read this before you buy:** same surface as search, same consequence. `score` is `null` on every item, and `profile.total_karma` and `profile.created` are `null` too. The response says so itself, in the two sentences its `_rss_limitations.note` adds over the search version: "Profile karma and cake-day are not in the user RSS feed (null). The feed returns the user's most recent public items only." So you get the **most recent ~25 public items**, with no pagination and no history. If you need a user's full post history or their karma, this is not the endpoint for that.
+Same surface as search, same consequence: `score` is `null` on every item, and `profile.total_karma` and `profile.created` are `null` too. The response says so itself, in the two sentences its `_rss_limitations.note` adds over the search version: "Profile karma and cake-day are not in the user RSS feed (null). The feed returns the user's most recent public items only." So you get the **most recent ~25 public items**, with no pagination and no history.
 
 Runnable: [`reddit_scraper_api_codes/user.py`](reddit_scraper_api_codes/user.py)
 
@@ -558,59 +557,9 @@ No new mentions since the last run. Schedule it (cron / GitHub Actions) and
 this becomes a feed of every new Reddit thread that names your keyword.
 ```
 
-The `n/a` scores in that screenshot are the honest part. Search cannot return a score (see the [ceiling above](#3-search-reddit-search-results-by-keyword)), so the script only spends a `/reddit/post` call on the newest few and leaves the rest unscored rather than guessing. Raise `--enrich` and you trade requests for coverage.
+The `n/a` scores in that screenshot follow from the search surface: it cannot return a score (see [the search endpoint](#3-search-reddit-search-results-by-keyword)), so the script only spends a `/reddit/post` call on the newest few and leaves the rest unscored. Raise `--enrich` and you trade requests for coverage.
 
-Cost: 1 request per run for the search, plus 1 per post you enrich. 1,000 free requests covers roughly a month of hourly checks on one keyword with light enrichment.
-
----
-
-## Build vs buy: what this actually costs
-
-Most scraper READMEs skip this analysis. Reddit also deserves a different answer from most targets, so here is the honest version first:
-
-**Use Reddit's official API if you can.** It exists, it is well documented, it is first-party, and for a personal project, a bot, a mod tool or academic research it is the right call and this repo is not. You register an app, you get an OAuth token, you use it. Do not pay anybody for something Reddit will give you.
-
-Two things in Reddit's own [Data API Terms](https://redditinc.com/policies/data-api-terms) (Effective June 19, 2023, last revised April 18, 2023) decide whether that path is open to you:
-
-- **You must use the OAuth token.** Section 2.8 requires access "using Access Info described in the Developer Documentation", and says you "will not misrepresent or mask either the user agent or OAuth identity". So it is a registered-app gate, not a header you can set.
-- **Commercial use is a separate agreement.** Section 3.1: "If you are interested in using the Data APIs for commercial purposes, research in excess of rate limits, or for any use that is not expressly permitted under the Data API Terms, then you will need to enter into a separate agreement with Reddit." The same section reserves Reddit's right "to charge fees for future use or access to the Data APIs, rates to be determined at Reddit's sole discretion", and 2.9 reserves the right to set and enforce limits "in our sole discretion".
-
-We are deliberately not quoting a queries-per-minute number or a price per 1,000 calls here. Those figures circulate widely, but we could not verify either from Reddit's own documentation on 2026-07-16 (the Reddit Data API Wiki returns 403 to us), and a number we cannot source is a number we will not print. Check [Reddit's terms](https://redditinc.com/policies/data-api-terms) and their developer docs for the current ones.
-
-So the decision is not "official API vs scraping". It is:
-
-| Your situation | What to do |
-|---|---|
-| Non-commercial, happy to register an OAuth app, within Reddit's limits | **Use the official API.** Seriously. |
-| Commercial use, no signed agreement with Reddit | Reddit's terms send you to a separate agreement. This API reads the same public pages a logged-out browser sees. |
-| You need public data now and cannot wait on an approval conversation | This, today, with a query param. |
-| You need every comment in a thread, or a user's full history | **Neither.** See the ceilings above: this API does not do it, and we would rather say so. |
-
-**Building it yourself**
-
-| Line item | Realistic estimate | Notes |
-|---|---|---|
-| Initial build | 2 to 4 dev days | Parser, proxy integration, retry/backoff, block detection, alerting. |
-| Residential proxies | ~$3 to $8/GB retail | Datacenter IPs are pre-blocked (see above), so this is not optional at volume. |
-| Bandwidth per request | **190 KB measured** | That is the refusal page, the only Reddit page size we actually measured (189,908 bytes on the wire, uncompressed). A real listing page is bigger, which makes this worse rather than better, but we did not measure it so we will not price it. |
-| Maintenance | ~1 to 2 days per break | Reddit's front end is a moving target, and the vote data lives in the markup, not in a stable JSON contract. |
-| Silent-failure risk | hard to price | The expensive failure is not a crash. It is a month of `score: null` that looked like "no votes". |
-
-**Buying it**
-
-| Plan | Price | Requests | Effective per 1,000 |
-|---|---|---|---|
-| Free | $0 | 1,000 (one-time) | - |
-| Vibe | $19/mo | 27,000/mo | $0.70 |
-| Pro | $49/mo | 82,000/mo | $0.60 |
-| Custom | from $100/mo | from 200,000/mo | $0.50 flat |
-| Pay-as-you-go top-up | $0.90 / 1,000 | never expires | $0.90 |
-
-The comparison that matters, and we are going to argue against ourselves for a second. At Pro a parsed Reddit response costs about **$0.0006**. Fetching that same page yourself costs roughly **$0.0006 to $0.0015** in residential bandwidth, depending on your proxy rate (190 KB at $3 to $8/GB). Those are the same number. **Bandwidth alone does not make the case**, and if you found a vendor at the cheap end of that range, the raw bytes are cheaper than we are.
-
-What actually decides it is everything next to the bytes: the 2 to 4 days to build it, the 1 to 2 days every time Reddit moves the markup, the alerting you have to write to tell "blocked" from "no results", and the month of silently null scores you eat when you get that wrong.
-
-Build it yourself when scraping is your product. Buy it when scraping is a dependency of your product. And when Reddit's own API covers you, use that instead of either.
+One request per run for the search, plus one per post you enrich. 1,000 free requests covers roughly a month of hourly checks on one keyword with light enrichment.
 
 ---
 
