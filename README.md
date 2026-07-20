@@ -214,7 +214,7 @@ An unresolvable post, verbatim:
 
 ### Rate limits and concurrency
 
-There is no per-minute request cap. The limit is **concurrency**: how many requests you may have in flight at once.
+Two limits apply. A **rate limit** of 120 requests per 60 seconds per key (a sustained 2 requests/second), and a **concurrency** cap on how many requests you may have in flight at once.
 
 | Plan | Concurrent requests |
 |---|---|
