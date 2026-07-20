@@ -168,7 +168,7 @@ Nothing below is billed: **you are only charged on a 2xx**.
 | `402` | `INSUFFICIENT_CREDITS` | Balance exhausted. | no | Top up ($0.90 / 1,000 requests, never expires) or upgrade. |
 | `404` | `item_not_found` | The post/user does not exist, was removed, or the input could not be resolved. `retryable: false`. | no | Fix the id. Retrying will not help. |
 | `429` | `RATE_LIMITED` | Over your plan's concurrency. | no | Back off and retry; see [Rate limits](#rate-limits-and-concurrency). |
-| `502` | `extraction_failed` / `target_unreachable` | Reddit refused every attempt, or the subreddit does not exist. `retryable: true`. | no | Retry. This is the case the free scraper hits permanently. |
+| `502` | `extraction_failed` / `target_unreachable` | Reddit refused every attempt, or the subreddit does not exist. `retryable: true`. | no | Retry. This is the case the free scraper hit on every attempt we made. |
 
 Two response shapes exist: auth/billing errors nest under `error.code` (uppercase), while scrape-layer errors are flat with a lowercase `error` string plus `retryable`. Both are shown below.
 
