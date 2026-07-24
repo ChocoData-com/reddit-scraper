@@ -300,7 +300,7 @@ Five behaviours to code against:
 - **`rising` is not a distinct ranking.** On r/news, r/AskReddit and r/programming it returned the **identical 24-post set** as `hot` (24/24 overlap on all three). Treat it as an alias of `hot` rather than a rising feed. `new` is genuinely different (0/24 overlap with `hot` on r/AskReddit).
 - **`top` and `controversial` need `t`.** Without a time window, `top` on r/Python returned 2 posts. With `t=all` it returned 24, topping out at a score of 12,342.
 
-Runnable: [`reddit_scraper_api_codes/subreddit.py`](reddit_scraper_api_codes/subreddit.py)
+Runnable: [`reddit_scraper_api_codes/subreddit.py`](reddit_scraper_api_codes/subreddit.py) · Single-endpoint repo: [reddit-subreddit-scraper](https://github.com/ChocoData-com/reddit-subreddit-scraper)
 
 ---
 
@@ -395,7 +395,7 @@ Four behaviours to code against:
 - **The post object is best-effort.** Even with the right casing it comes from a second fetch that can miss: we saw it return `null` once in roughly two dozen calls. The comment tree and `num_comments` always arrived. If `post.title is None`, retry.
 - **A dead post id returns 200, not 404.** `post_id=zzzzzzz` gives an all-null post stub with `num_comments: 0`. Check `post.title is None` rather than trusting the status code.
 
-Runnable: [`reddit_scraper_api_codes/post.py`](reddit_scraper_api_codes/post.py)
+Runnable: [`reddit_scraper_api_codes/post.py`](reddit_scraper_api_codes/post.py) · Single-endpoint repo: [reddit-post-scraper](https://github.com/ChocoData-com/reddit-post-scraper)
 
 ---
 
@@ -534,7 +534,7 @@ curl "https://api.chocodata.com/api/v1/reddit/user?api_key=YOUR_KEY&username=spe
 
 Same surface as search, same consequence: `score` is `null` on every item, and `profile.total_karma` and `profile.created` are `null` too. The response says so itself, in the two sentences its `_rss_limitations.note` adds over the search version: "Profile karma and cake-day are not in the user RSS feed (null). The feed returns the user's most recent public items only." So you get the **most recent ~25 public items**, with no pagination and no history.
 
-Runnable: [`reddit_scraper_api_codes/user.py`](reddit_scraper_api_codes/user.py)
+Runnable: [`reddit_scraper_api_codes/user.py`](reddit_scraper_api_codes/user.py) · Single-endpoint repo: [reddit-user-scraper](https://github.com/ChocoData-com/reddit-user-scraper)
 
 ---
 
